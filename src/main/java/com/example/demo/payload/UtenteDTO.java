@@ -1,6 +1,6 @@
 package com.example.demo.payload;
 
-import com.example.demo.model.Ruolo;
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;

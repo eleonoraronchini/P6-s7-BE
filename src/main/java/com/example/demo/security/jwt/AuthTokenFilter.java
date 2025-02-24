@@ -11,33 +11,48 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.util.StringUtils;
+import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-public class AuthTokenFilter {
+public class AuthTokenFilter extends OncePerRequestFilter {
+
     @Autowired
     JwtUtils utils;
+
     @Autowired
     UserDetailsService userDetailsService;
 
-    private String anallizaJwt(HttpServletRequest request){
-        String headAuthentication = request.getHeader("Authorization");
-        if(StringUtils.hasText(headAuthentication)&&(headAuthentication.startsWith("Bearer "))){
-            return headAuthentication.substring(7);
-        } return null;
-    }
-    protected void doFilterInternal (HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException{
-      String jwt = anallizaJwt(request);
-      if(jwt != null && utils.validazioneJwtToken(jwt)){
-          String username = utils.recuperoUsernameDaJwts(jwt);
-          UserDetails dettagliUtente = userDetailsService.loadUserByUsername(username);
-          UsernamePasswordAuthenticationToken autenticazione = new UsernamePasswordAuthenticationToken(
-                  dettagliUtente,
-                  null,
-                  dettagliUtente.getAuthorities());
-          autenticazione.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-          SecurityContextHolder.getContext().setAuthentication(autenticazione);
-
+    private String getJwtFromRequest(HttpServletRequest request) {
+        String headerAuth = request.getHeader("Authorization");
+        if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
+            return headerAuth.substring(7); // Restituisce il token senza "Bearer "
         }
+        return null;
+    }
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
+
+        String jwt = getJwtFromRequest(request);
+
+        if (jwt != null && utils.validazioneJwtToken(jwt)) {
+            String username = utils.recuperoUsernameDaJwts(jwt);
+            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                    userDetails,
+                    null,
+                    userDetails.getAuthorities()
+            );
+            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+            // Impostiamo il contesto di sicurezza
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        }
+
+        // Proseguiamo con il filtro successivo
+        filterChain.doFilter(request, response);
     }
 }

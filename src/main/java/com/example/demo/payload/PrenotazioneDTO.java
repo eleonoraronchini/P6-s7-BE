@@ -2,8 +2,6 @@ package com.example.demo.payload;
 
 import com.example.demo.model.Evento;
 import com.example.demo.model.Utente;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
