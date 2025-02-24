@@ -12,6 +12,8 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -63,6 +65,15 @@ public class UtenteService {
         return utenteRepository.findByUsername(username);
     }
 
+    public UtenteDTO getUtenteById(Long id) {
+        Optional<Utente> utente = utenteRepository.findById(id);
+        if (utente.isPresent()) {
+            return utenteMapper.toDTO(utente.get());
+        } else {
+            throw new RuntimeException("il dipendente con chiave: " + id + " non è presente");
+        }
+    }
+
     public UtenteDTO modificaRuoloByAdmin(Utente utente) {
         Optional<Utente> utenteRicercato = utenteRepository.findById(utente.getId());
         if (utenteRicercato.isPresent()) {
@@ -74,6 +85,14 @@ public class UtenteService {
         } else {
           throw new RuntimeException("Nessun utente trovato nel database");
         }
+    }
+    public List<UtenteDTO> getAllUtenti() {
+        List<Utente> lista = utenteRepository.findAll();
+        List<UtenteDTO> listaDTO = new ArrayList<>();
+        for (Utente utente : lista) {
+            listaDTO.add(utenteMapper.toDTO(utente));
+        }
+        return listaDTO;
     }
 }
 

@@ -8,6 +8,7 @@ import com.example.demo.payload.UtenteDTO;
 import com.example.demo.payload.request.LoginRequest;
 import com.example.demo.payload.request.RegistrazioneRequest;
 import com.example.demo.payload.response.JwtResponse;
+import com.example.demo.repository.UtenteRepository;
 import com.example.demo.security.jwt.JwtUtils;
 import com.example.demo.security.services.UserDetailsImpl;
 import com.example.demo.service.UtenteService;
@@ -28,6 +29,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.swing.text.html.Option;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 @Component
@@ -139,6 +142,19 @@ public class UtenteController {
         } utenteService.updateUtente(utente);
         return new ResponseEntity<>("Utente aggiornato nel database", HttpStatus.OK);
     }
+
+    @GetMapping("/findById/{id}")
+    public UtenteDTO getUtente(@PathVariable Long id) {
+        return utenteService.getUtenteById(id);
+    }
+
+    @GetMapping("/findAll")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public List<UtenteDTO> getAllUtenti() {
+        return utenteService.getAllUtenti();
+    }
+
+
 }
 
 
